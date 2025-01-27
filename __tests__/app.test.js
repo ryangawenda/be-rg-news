@@ -1,4 +1,5 @@
 const endpointsJson = require("../endpoints.json");
+const {articleData, commentData, userData, topicData} = require("../db/data/test-data/index.js")
 /* Set up your test imports here */
 const request = require("supertest")
 const app = require("../app.js")
@@ -17,4 +18,16 @@ describe("GET /api", () => {
   });
 });
 
+
+
+describe("GET /api/topics" , () => {
+  test("200:Responds with an array of topic objects with a slug and description properties on each", () => {
+    return request(app)
+    .get("/api/topics")
+    .expect(200)
+    .then(({ body: { topics } }) => {
+      expect(topics).toEqual(topicData);
+    });
+  });
+});
 
