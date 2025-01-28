@@ -60,3 +60,30 @@ test("404: Responds with error 404 for an invalid article_id", () => {
   .expect(404)
 })
 })
+
+describe("GET /api/articles" , () => {
+  test("200: Responds with all the article objects in an array", () => {
+    const sortedArticles = articleData.sort((a, b) => b.created_at - a.created_at)
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then((articles) => {
+      const returnedArticles = articles.body.articles
+      console.log(returnedArticles[0])
+      console.log(sortedArticles[0])
+
+      let count = 0
+      returnedArticles.forEach((article) => {
+      expect( article.author).toEqual(sortedArticles[count].author)
+      expect( article.title).toEqual(sortedArticles[count].title)
+      expect( typeof article.article_id).toEqual("number")
+      expect( article.body).toEqual(undefined)
+      expect( article.topic).toEqual(sortedArticles[count].topic)
+      expect( typeof article.votes).toEqual("number")
+      expect( article.article_img_url).toEqual(sortedArticles[count].article_img_url)
+      count ++
+    })
+    }
+  )
+  })
+})
