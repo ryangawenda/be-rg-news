@@ -5,6 +5,7 @@ const db = require('../db/connection.js');
 const request = require("supertest")
 const app = require("../app.js")
 const seed = require('../db/seeds/seed.js');
+const articles = require("../db/data/test-data/articles.js");
 /* Set up your beforeEach & afterAll functions here */
 beforeEach(() => seed({ topicData, userData, articleData, commentData }))
 afterAll(() => db.end());
@@ -69,9 +70,7 @@ describe("GET /api/articles" , () => {
     .expect(200)
     .then((articles) => {
       const returnedArticles = articles.body.articles
-      console.log(returnedArticles[0])
-      console.log(sortedArticles[0])
-
+      expect(returnedArticles.length).toEqual(articleData.length)
       let count = 0
       returnedArticles.forEach((article) => {
       expect( article.author).toEqual(sortedArticles[count].author)
@@ -85,5 +84,29 @@ describe("GET /api/articles" , () => {
     })
     }
   )
+  })
+})
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Responds with all the comments for a given article", () => {
+    return request(app)
+    .get("/api/articles/6/comments")
+    .expect(200)
+    .then(({body : {comments}}) => {
+      console.log(comments)
+      comments.forEach((comment)=>{
+        expect(typeof comment.comment_id).toEqual("number")
+        expect(typeof comment.votes).toEqual("number")
+        expect(typeof comment.created_at).toEqual("string")
+        expect(typeof comment.author).toEqual("string")
+        expect(typeof comment.body).toEqual("string")
+        expect(typeof comment.article_id).toEqual("number")
+      })
+    })
+  })
+  test("404: Responds with error 404 for an invalid article_id", () => {
+    return request(app)
+    .get("/api/articles/22/comments")
+    .expect(404)
   })
 })
