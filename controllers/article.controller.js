@@ -1,5 +1,5 @@
 const comments = require("../db/data/test-data/comments")
-const {fetchArticles, fetchArticleById, fetchComments} = require("../models/articles.model")
+const {fetchArticles, fetchArticleById, fetchComments,postComments} = require("../models/articles.model")
 exports.getArticle = (req,res, next) => {
     const article_id = req.params.article_id
     return fetchArticleById(article_id)
@@ -34,9 +34,18 @@ exports.getComments = (req,res, next) => {
         }
         else {
         const sortedComments = comments.sort((a, b) => b.created_at - a.created_at)
-        console.log(sortedComments)
         res.status(200).send({"comments" : sortedComments})
         }
  })
+    .catch(next)
+}
+
+exports.addComments = (req,res, next) => {
+    const article_id = req.params.article_id
+    const {username , body} = req.body
+    return postComments(article_id,username,body,next)
+    .then((comment) => {
+        res.status(201).send({"comment": comment})
+    })
     .catch(next)
 }
