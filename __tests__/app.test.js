@@ -93,7 +93,6 @@ describe("GET /api/articles/:article_id/comments", () => {
     .get("/api/articles/6/comments")
     .expect(200)
     .then(({body : {comments}}) => {
-      console.log(comments)
       comments.forEach((comment)=>{
         expect(typeof comment.comment_id).toEqual("number")
         expect(typeof comment.votes).toEqual("number")
@@ -109,4 +108,27 @@ describe("GET /api/articles/:article_id/comments", () => {
     .get("/api/articles/22/comments")
     .expect(404)
   })
+})
+
+describe("POST /api/articles/:article_id/comments" , () => {
+test("201: Posts a comment to the designated article_id and returns the comment body", () => {
+  return request(app)
+  .post("/api/articles/2/comments").send({
+    username: 'icellusedkars',
+    body : "I love posting comments"
+  })
+  .expect(201)
+  .then(({body : {comment}}) => {
+    return db.query(`SELECT * FROM comments WHERE body = $1`, ["I love posting comments"])   
+    .then((postedcommentObject) => {
+      const postedComment = postedcommentObject.rows
+    expect(comment.article_id).toEqual(postedComment.article_id)
+    expect(comment.author).toEqual(postedComment.author)
+    expect(comment.body).toEqual(postedComment.body)
+    expect(comment.comment_id).toEqual(postedComment.article_id)
+    expect(comment.votes).toEqual(postedComment.votes)
+    //date returns correctly but as a string not a date value, when i try to parse it changes format, unsure of how to approach/change this but code is inserted into database correctly    
+  })
+})
+})
 })
