@@ -1,5 +1,5 @@
 const comments = require("../db/data/test-data/comments")
-const {fetchArticles, fetchArticleById, fetchComments,postComments} = require("../models/articles.model")
+const {fetchArticles, fetchArticleById, fetchComments,postComments, updateArticleVotes} = require("../models/articles.model")
 exports.getArticle = (req,res, next) => {
     const article_id = req.params.article_id
     return fetchArticleById(article_id)
@@ -27,25 +27,47 @@ exports.getAllArticles = (req,res, next) => {
 
 exports.getComments = (req,res, next) => {
     const article_id = req.params.article_id
-    return fetchComments(article_id)
+    return fetchArticleById(article_id)
+    .then((article) => {
+          if (article[0] === undefined) {
+              return Promise.reject({ status: 404, msg: 'This article does not exist' });
+          }
+          return fetchComments(article_id); 
+      })
     .then((comments) => {
-        if (comments.length === 0){
-            next({ status: 404, msg: 'No comments on this article' });
-        }
-        else {
-        const sortedComments = comments.sort((a, b) => b.created_at - a.created_at)
-        res.status(200).send({"comments" : sortedComments})
-        }
- })
-    .catch(next)
-}
+          if (comments.length === 0) {
+              next({ status: 200, msg: 'No comments on this article' });
+          } else {
+              const sortedComments = comments.sort((a, b) => b.created_at - a.created_at);
+              res.status(200).send({ comments: sortedComments });
+          }
+      })
+    .catch(next);
+};
 
 exports.addComments = (req,res, next) => {
     const article_id = req.params.article_id
     const {username , body} = req.body
     return postComments(article_id,username,body,next)
     .then((comment) => {
-        res.status(201).send({"comment": comment})
+        const postedComment = comment[0]
+        res.status(201).send({"comment": postedComment})
     })
+    .catch(next)
+}
+
+exports.patchArticles = (req,res,next) => {    const article_id = req.params.article_id
+    const { inc_votes } = req.body;
+    return fetchArticleById(article_id)
+    .then((article) => {
+          if (article[0] === undefined) {
+              return Promise.reject({ status: 404, msg: 'This article does not exist' });
+          }
+    return updateArticleVotes(article_id,inc_votes).
+    then((updatedArticleArray) => {
+        const updatedArticle = updatedArticleArray[0]
+        res.status(200).send({article : updatedArticle})
+    })
+})
     .catch(next)
 }
