@@ -187,3 +187,19 @@ describe("DELETE api/comments/:comment_id", () => {
     })
     })
 })
+
+describe("GET api/users", () => {
+  test("200: Returns an array of all the user objects with username, name and avatar url present", () => {
+    return request(app)
+    .get("/api/users")
+    .expect(200)
+    .then(({body : {users}}) => {
+      expect(users.length).toEqual(4)
+      users.forEach((user) => {
+        expect(typeof user.username).toEqual("string")
+        expect(typeof user.name).toEqual("string")
+        expect(typeof user.avatar_url).toEqual("string")
+      })
+    })
+  })
+})
