@@ -1,5 +1,5 @@
 const comments = require("../db/data/test-data/comments")
-const {fetchArticles, fetchArticleById, fetchComments,postComments, updateArticleVotes} = require("../models/articles.model")
+const {fetchArticles, fetchArticleById, fetchComments,postComments, updateArticleVotes, deleteComments} = require("../models/articles.model")
 exports.getArticle = (req,res, next) => {
     const article_id = req.params.article_id
     return fetchArticleById(article_id)
@@ -69,5 +69,17 @@ exports.patchArticles = (req,res,next) => {    const article_id = req.params.art
         res.status(200).send({article : updatedArticle})
     })
 })
+    .catch(next)
+}
+
+exports.deleteComment = (req,res,next) => {
+    const comment_id = req.params.comment_id
+    return deleteComments(comment_id)
+    .then((returnedComment)=>{
+        if (returnedComment.length === 0){
+            next({ status: 404, msg: 'This article does not exist' });
+        }
+        res.status(204).send()
+    })
     .catch(next)
 }
