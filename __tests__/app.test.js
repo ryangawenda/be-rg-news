@@ -147,7 +147,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH api/articles/:article_id" , () => {
-  test("Will increase the the votes of the selected article", () => {
+  test("202:Will increase the the votes of the selected article", () => {
     return request(app)
     .patch("/api/articles/1")
     .send({inc_votes : 10})
@@ -159,6 +159,28 @@ describe("PATCH api/articles/:article_id" , () => {
   test("404: Returns an error if an invalid article_id is given", () => {
     return request(app)
     .patch("/api/articles/19")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("This article does not exist")
+    })
+    })
+})
+
+describe("DELETE api/comments/:comment_id", () => {
+  test("204: Deletes a comment when given a corresponding comment_id", () => {
+    return request(app)
+    .delete("/api/comments/12")
+    .expect(204)
+    .then(() => {
+       return db.query('SELECT * FROM comments WHERE comment_id = 12'); 
+      })
+    .then((result) => {
+        expect(result.rows.length).toBe(0);
+    })
+  })
+  test("404: Returns an error if an invalid article_id is given", () => {
+    return request(app)
+    .delete("/api/comments/78")
     .expect(404)
     .then(({body}) => {
       expect(body.msg).toBe("This article does not exist")
