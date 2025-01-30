@@ -103,32 +103,65 @@ describe("GET /api/articles/:article_id/comments", () => {
       })
     })
   })
+  test("200: Returns an empty array if no comments are present", () => {
+    return request(app)
+    .get("/api/articles/4/comments")
+    .expect(200)
+    .then(({body}) => {
+      expect(body.msg).toBe('No comments on this article')
+    })
+  })
   test("404: Responds with error 404 for an invalid article_id", () => {
     return request(app)
     .get("/api/articles/22/comments")
     .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("This article does not exist")
+    })
+    
   })
 })
 
-describe("POST /api/articles/:article_id/comments" , () => {
-test("201: Posts a comment to the designated article_id and returns the comment body", () => {
-  return request(app)
-  .post("/api/articles/2/comments").send({
-    username: 'icellusedkars',
-    body : "I love posting comments"
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Posts a comment to the designated article_id and returns the comment body", () => {
+     return request(app)
+     .post("/api/articles/2/comments").send({
+      username: 'icellusedkars',
+      body : "I love posting comments"
+    })
+    .expect(201)
+    .then(({body : {comment}}) => {
+      expect(comment.article_id).toEqual(2);
+      expect(comment.author).toEqual('icellusedkars');
+      expect(comment.body).toEqual("I love posting comments");
+    })
+    });
+  test("404: Returns an error if an invalid article_id is given", () => {
+    return request(app)
+    .post("/api/articles/22/comments")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("This article does not exist")
+    })
+    })
+});
+
+describe("PATCH api/articles/:article_id" , () => {
+  test("Will increase the the votes of the selected article", () => {
+    return request(app)
+    .patch("/api/articles/1")
+    .send({inc_votes : 10})
+    .expect(200)
+    .then(({body : {article}}) => {
+      expect(article.votes).toEqual(10)
+    })
   })
-  .expect(201)
-  .then(({body : {comment}}) => {
-    return db.query(`SELECT * FROM comments WHERE body = $1`, ["I love posting comments"])   
-    .then((postedcommentObject) => {
-      const postedComment = postedcommentObject.rows
-    expect(comment.article_id).toEqual(postedComment.article_id)
-    expect(comment.author).toEqual(postedComment.author)
-    expect(comment.body).toEqual(postedComment.body)
-    expect(comment.comment_id).toEqual(postedComment.article_id)
-    expect(comment.votes).toEqual(postedComment.votes)
-    //date returns correctly but as a string not a date value, when i try to parse it changes format, unsure of how to approach/change this but code is inserted into database correctly    
-  })
-})
-})
+  test("404: Returns an error if an invalid article_id is given", () => {
+    return request(app)
+    .patch("/api/articles/19")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("This article does not exist")
+    })
+    })
 })
