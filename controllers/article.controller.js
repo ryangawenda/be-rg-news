@@ -16,7 +16,21 @@ exports.getArticle = (req,res, next) => {
 }
 
 exports.getAllArticles = (req,res, next) => {
-    return fetchArticles()
+    let {sort_by , order} = req.query
+    if (!sort_by){
+        sort_by = 'created_at'
+    }
+    if (!order){
+        order = 'desc'
+    }
+    const whitelist = ['article_id', 'title', 'topic', 'author', 'created_at', 'votes'];
+    if (sort_by &&!whitelist.includes(sort_by)) {
+        next({ status: 400, msg: 'Invalid sort_by query' });
+    }
+    if(order !== "desc" && order !== "asc"){
+        next({ status: 400, msg: 'Invalid order query' });
+    }
+    return fetchArticles(sort_by,order)
     .then((articles) => {
         const sortedArticles = articles.sort((a, b) => b.created_at - a.created_at)
         res.status(200).send({"articles" : sortedArticles})
