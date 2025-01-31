@@ -5,8 +5,9 @@ exports.fetchArticleById = (article_id) => {
     })
 }
 
-exports.fetchArticles = () => {
-    return db.query("SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles").then((articles) => {
+exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
+    const orderBy = `${sort_by} ${order}`
+    return db.query(`SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles ORDER BY ${orderBy}`).then((articles) => {
         return articles.rows
     })
 }

@@ -203,3 +203,44 @@ describe("GET api/users", () => {
     })
   })
 })
+
+
+describe("GET api/articles?sort_by=:sorted&order=:ordered", () => {
+  test("200: Returns the array of articles with a query for value to sort by and the order for that value", () => {
+    return request(app)
+    .get("/api/articles?sort_by=created_at&order=desc")
+    .expect(200)
+    .then(({body: {articles}}) => {
+      const createdAtArray = articles.map(article => Date.parse(article.created_at)); 
+      expect(createdAtArray).toBeSorted({ descending: true });
+      expect(articles.length).toEqual(13)
+      articles.forEach((article) => {
+      expect(typeof article.author).toEqual("string")
+      expect(typeof article.title).toEqual("string")
+      expect(typeof article.article_id).toEqual("number")
+      expect(typeof article.body).toEqual("undefined")
+      expect(typeof article.topic).toEqual("string")
+      expect(typeof article.votes).toEqual("number")
+      expect(typeof article.article_img_url).toEqual("string")
+    })
+    })
+    
+  })
+  test("400: Returns an error if an invalid sort_by is given", () => {
+    return request(app)
+    .get("/api/articles?sort_by=random&order=desc")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe('Invalid sort_by query')
+    })
+    })
+
+    test("400: Returns an error if an invalid order is given", () => {
+    return request(app)
+    .get("/api/articles?sort_by=title&order=sideways")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe('Invalid order query')
+    })
+    })
+})
