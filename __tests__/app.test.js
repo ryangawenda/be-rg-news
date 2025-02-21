@@ -87,6 +87,30 @@ describe("GET /api/articles" , () => {
   })
 })
 
+describe("GET /api/articles?topic=<topic_value>" , () => {
+  test("200: Responds with all the article objects in an array", () => {
+    const sortedArticles = articleData.sort((a, b) => b.created_at - a.created_at)
+    return request(app)
+    .get("/api/articles?topic=coding")
+    .expect(200)
+    .then((articles) => {
+      const returnedArticles = articles.body.articles
+      let count = 0
+      returnedArticles.forEach((article) => {
+      expect( article.author).toEqual(sortedArticles[count].author)
+      expect( article.title).toEqual(sortedArticles[count].title)
+      expect( typeof article.article_id).toEqual("number")
+      expect( article.body).toEqual(undefined)
+      expect( article.topic).toEqual("coding")
+      expect( typeof article.votes).toEqual("number")
+      expect( article.article_img_url).toEqual(sortedArticles[count].article_img_url)
+      count ++
+    })
+    }
+  )
+  })
+})
+
 describe("GET /api/articles/:article_id/comments", () => {
   test("200: Responds with all the comments for a given article", () => {
     return request(app)
@@ -243,4 +267,29 @@ describe("GET api/articles?sort_by=:sorted&order=:ordered", () => {
       expect(body.msg).toBe('Invalid order query')
     })
     })
+})
+
+
+describe.only("GET /api/articles?topic=<topic_value>" , () => {
+  test("200: Responds with all the article objects in an array", () => {
+    const sortedArticles = (articleData.sort((a, b) => b.created_at - a.created_at)).filter((article) => article.topic === "mitch")
+    return request(app)
+    .get("/api/articles?topic=mitch")
+    .expect(200)
+    .then((articles) => {
+      const returnedArticles = articles.body.articles
+      let count = 0
+      returnedArticles.forEach((article) => {
+      expect( article.author).toEqual(sortedArticles[count].author)
+      expect( article.title).toEqual(sortedArticles[count].title)
+      expect( typeof article.article_id).toEqual("number")
+      expect( article.body).toEqual(undefined)
+      expect( article.topic).toEqual("mitch")
+      expect( typeof article.votes).toEqual("number")
+      expect( article.article_img_url).toEqual(sortedArticles[count].article_img_url)
+      count ++
+    })
+    }
+  )
+  })
 })

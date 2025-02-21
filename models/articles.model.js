@@ -5,11 +5,18 @@ exports.fetchArticleById = (article_id) => {
     })
 }
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'desc') => {
+exports.fetchArticles = (sort_by = 'created_at', order = 'desc', topic) => {
     const orderBy = `${sort_by} ${order}`
+    if(topic){
+    return db.query(`SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles WHERE topic = $1 ORDER BY ${orderBy}`, [topic]).then((articles) => {
+        return articles.rows
+    })
+    }
+    else {
     return db.query(`SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles ORDER BY ${orderBy}`).then((articles) => {
         return articles.rows
     })
+}
 }
 
 exports.fetchComments = (article_id) => {

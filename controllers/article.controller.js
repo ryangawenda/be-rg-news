@@ -16,7 +16,7 @@ exports.getArticle = (req,res, next) => {
 }
 
 exports.getAllArticles = (req,res, next) => {
-    let {sort_by , order} = req.query
+    let {sort_by , order, topic} = req.query
     if (!sort_by){
         sort_by = 'created_at'
     }
@@ -30,8 +30,9 @@ exports.getAllArticles = (req,res, next) => {
     if(order !== "desc" && order !== "asc"){
         next({ status: 400, msg: 'Invalid order query' });
     }
-    return fetchArticles(sort_by,order)
+    return fetchArticles(sort_by,order,topic)
     .then((articles) => {
+        console.log(articles)
         const sortedArticles = articles.sort((a, b) => b.created_at - a.created_at)
         res.status(200).send({"articles" : sortedArticles})
     })
@@ -97,3 +98,5 @@ exports.deleteComment = (req,res,next) => {
     })
     .catch(next)
 }
+
+
